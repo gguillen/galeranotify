@@ -32,6 +32,6 @@ A SELinux policy (galeranotify.pp) is also included that allows the mysql user t
 
 Usage:
 
-  semodule -i galeranotify.pp
+    semodule -i galeranotify.pp
 
 This rule was generated on Centos 6.4 64-bit.  It may or may not work for your particular setup.
