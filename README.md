@@ -30,4 +30,8 @@ SELinux
 
 A SELinux policy (galeranotify.pp) is also included that allows the mysql user to connect to a standard remote smtp port (port 25).  If you are using an alternate SMTP port (common with SSL), this rule will not work for you.
 
+Usage:
+
+  semodule -i galeranotify.pp
+
 This rule was generated on Centos 6.4 64-bit.  It may or may not work for your particular setup.
