@@ -1,0 +1,14 @@
+
+module galeranotify 1.0;
+
+require {
+	type smtp_port_t;
+	type mysqld_t;
+	class tcp_socket name_connect;
+}
+
+#============= mysqld_t ==============
+
+#!!!! This avc can be allowed using one of the these booleans:
+#     mysql_connect_any, allow_ypbind
+allow mysqld_t smtp_port_t:tcp_socket name_connect;
