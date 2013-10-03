@@ -15,7 +15,12 @@ import os
 import sys
 import getopt
 
-import smtplib, email
+import smtplib
+
+try: from email.mime.text import MIMEText
+except ImportError:
+    # Python 2.4 (CentOS 5.x)
+    from email.MIMEText import MIMEText
 
 import socket
 
@@ -93,14 +98,11 @@ def main(argv):
 
 def send_notification(from_email, to_email, subject, message, smtp_server,
                       smtp_port, use_ssl, use_auth, smtp_user, smtp_pass):
-    msg = email.MIMEMultipart.MIMEMultipart()
-    body = email.MIMEText.MIMEText(message)
+    msg = MIMEText(message)
 
-    msg.attach(body)
-
-    msg.add_header('From', from_email)
-    msg.add_header('To', ', '.join(to_email))
-    msg.add_header('Subject', subject)
+    msg['From'] = from_email
+    msg['To'] = ', '.join(to_email)
+    msg['Subject'] =  subject
 
     if(use_ssl):
         mailer = smtplib.SMTP_SSL(smtp_server, smtp_port)
