@@ -6,8 +6,8 @@
 # Complies with http://www.codership.com/wiki/doku.php?id=notification_command
 #
 # Author: Gabe Guillen <gguillen@gesa.com>
-# Version: 1.2
-# Release: 6/27/2013
+# Version: 1.3
+# Release: 10/03/2013
 # Use at your own risk.  No warranties expressed or implied.
 #
 
