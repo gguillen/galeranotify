@@ -222,9 +222,11 @@ class GaleraStatus:
 
     def __str__(self):
         if self._cluster_name:
-            email_body = 'Galera Cluster "%s" running on host "%s" has an updated cluster state:\n\n' % (self._cluster_name, self._server)
+            email_body = 'Galera Cluster "%s" running on host "%s" has an updated cluster state:\n\n' % \
+                (self._cluster_name, self._server)
         else:
-            email_body = 'Galera Cluster running on host "%s" has an updated cluster state:\n\n' % self._server
+            email_body = 'Galera Cluster running on host "%s" has an updated cluster state:\n\n' % \
+                self._server
         email_body += '%s' % '    Cluster Name        ::  %s\n\n' % self._cluster_name if self._cluster_name else ''
         email_body += '%s' % '    Cluster State UUID  ::  %s\n\n' % self._uuid if self._uuid else ''
         email_body += '%s' % '    Node Name           ::  %s\n\n' % self._server
@@ -234,7 +236,8 @@ class GaleraStatus:
             email_body += '    Cluster Members:\n\n'
             for index in range(len(self._members)):
                 email_body += '        -%s %s\n' % ('>' if index == int(self._index) else '-', self._members[index])
-            email_body += '\n%s\n' % '    This node is index [%s] in the member list\n' % self._index if self._index else ''
+            email_body += '\n%s\n' % '    This node is index [%s] in the member list\n' % self._index \
+                if self._index else ''
         return email_body
 
 
