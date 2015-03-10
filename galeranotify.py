@@ -94,7 +94,7 @@ def main(argv):
         print 'Only one of SSL and TLS can be set, preferring SSL'
         SMTP_TLS = False
 
-    usage = 'Usage: %s' % os.path.basename(sys.argv[0])
+    usage = 'Usage: %s --cluster-name <cluster-name>' % os.path.basename(sys.argv[0])
     usage += ' --status <status str> --uuid <state UUID> --primary <yes/no>'
     usage += ' --members <comma-seperated list of the component member UUIDs> --index <n>'
 
