@@ -86,6 +86,8 @@ def main(argv):
     str_index = ''
     email_body = ''
 
+    global MAIL_SUBJECT
+
     global SMTP_SSL
     global SMTP_TLS
     if SMTP_SSL and SMTP_TLS:
@@ -99,7 +101,7 @@ def main(argv):
     try:
         opts, args = getopt.getopt(
             argv, 'h',
-            ['status=', 'uuid=', 'primary=', 'members=', 'index='])
+            ['cluster-name=', 'status=', 'uuid=', 'primary=', 'members=', 'index='])
     except getopt.GetoptError:
         print usage
         sys.exit(2)
@@ -120,6 +122,9 @@ def main(argv):
                 MAIL_CONTENT.set_members(arg)
             elif opt in ('--index'):
                 MAIL_CONTENT.set_index(arg)
+            elif opt in ('--cluster-name'):
+                MAIL_CONTENT.set_cluster_name(arg)
+                MAIL_SUBJECT = 'Galera Notification for cluster "%s", host "%s"' % (arg, THIS_SERVER)
         try:
             send_notification(MAIL_FROM, MAIL_TO, MAIL_SUBJECT, str(MAIL_CONTENT),
                               SMTP_SERVER, SMTP_PORT, SMTP_SSL, SMTP_TLS,
@@ -183,12 +188,17 @@ def send_notification(
 class GaleraStatus:
     def __init__(self, server):
         self._server = server
+        self._cluster_name = ''
         self._status = ''
         self._uuid = ''
         self._primary = ''
         self._members = ''
         self._index = ''
         self._count = 0
+
+    def set_cluster_name(self, cluster_name):
+        self._cluster_name = cluster_name
+        self._count += 1
 
     def set_status(self, status):
         self._status = status
@@ -211,10 +221,15 @@ class GaleraStatus:
         self._count += 1
 
     def __str__(self):
-        email_body = 'Galera running on host "%s" has an updated cluster state:\n\n' % self._server
-        email_body += '%s' % '    Cluster State UUID    ::  %s\n\n' % self._uuid if self._uuid else ''
-        email_body += '%s' % '    Status of This Node   ::  %s\n\n' % self._status if self._status else ''
-        email_body += '%s' % '    This Node is Primary  ::  %s\n\n' % self._primary if self._primary else ''
+        if self._cluster_name:
+            email_body = 'Galera Cluster "%s" running on host "%s" has an updated cluster state:\n\n' % (self._cluster_name, self._server)
+        else:
+            email_body = 'Galera Cluster running on host "%s" has an updated cluster state:\n\n' % self._server
+        email_body += '%s' % '    Cluster Name        ::  %s\n\n' % self._cluster_name if self._cluster_name else ''
+        email_body += '%s' % '    Cluster State UUID  ::  %s\n\n' % self._uuid if self._uuid else ''
+        email_body += '%s' % '    Node Name           ::  %s\n\n' % self._server
+        email_body += '%s' % '    Node Status         ::  %s\n\n' % self._status if self._status else ''
+        email_body += '%s' % '    Node Primary        ::  %s\n\n' % self._primary if self._primary else ''
         if self._members:
             email_body += '    Cluster Members:\n\n'
             for index in range(len(self._members)):
