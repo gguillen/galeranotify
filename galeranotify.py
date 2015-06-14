@@ -6,8 +6,9 @@
 # Complies with http://www.codership.com/wiki/doku.php?id=notification_command
 #
 # Author: Gabe Guillen <gguillen@gesa.com>
-# Version: 1.3
-# Release: 10/03/2013
+# Modified by: Josh Goldsmith <joshin@hotmail.com>
+# Version: 1.4
+# Release: 5/14/2015
 # Use at your own risk.  No warranties expressed or implied.
 #
 
@@ -16,6 +17,7 @@ import sys
 import getopt
 
 import smtplib
+import datetime
 
 try: from email.mime.text import MIMEText
 except ImportError:
@@ -45,6 +47,9 @@ SMTP_PASSWORD = ''
 MAIL_FROM = 'YOUR_EMAIL_HERE'
 # Takes a list of recipients
 MAIL_TO = ['SOME_OTHER_EMAIL_HERE']
+
+# Need Date in Header for SMTP RFC Compliance
+DATE = datetime.datetime.now().strftime( "%d/%m/%Y %H:%M" )
 
 # Edit below at your own risk
 ################################################################################
@@ -84,7 +89,7 @@ def main(argv):
             elif opt in ("--index"):
                 message_obj.set_index(arg)
         try:
-            send_notification(MAIL_FROM, MAIL_TO, 'Galera Notification: ' + THIS_SERVER,
+            send_notification(MAIL_FROM, MAIL_TO, 'Galera Notification: ' + THIS_SERVER, DATE,
                               str(message_obj), SMTP_SERVER, SMTP_PORT, SMTP_SSL, SMTP_AUTH,
                               SMTP_USERNAME, SMTP_PASSWORD)
         except Exception, e:
@@ -96,13 +101,14 @@ def main(argv):
 
     sys.exit(0)
 
-def send_notification(from_email, to_email, subject, message, smtp_server,
+def send_notification(from_email, to_email, subject, date, message, smtp_server,
                       smtp_port, use_ssl, use_auth, smtp_user, smtp_pass):
     msg = MIMEText(message)
 
     msg['From'] = from_email
     msg['To'] = ', '.join(to_email)
     msg['Subject'] =  subject
+    msg['Date'] =  date
 
     if(use_ssl):
         mailer = smtplib.SMTP_SSL(smtp_server, smtp_port)
