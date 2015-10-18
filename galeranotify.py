@@ -49,7 +49,7 @@ MAIL_FROM = 'YOUR_EMAIL_HERE'
 MAIL_TO = ['SOME_OTHER_EMAIL_HERE']
 
 # Need Date in Header for SMTP RFC Compliance
-DATE = datetime.datetime.now().strftime( "%d/%m/%Y %H:%M" )
+DATE = datetime.datetime.now().strftime( "%m/%d/%Y %H:%M" )
 
 # Edit below at your own risk
 ################################################################################
