@@ -5,10 +5,9 @@
 #
 # Complies with http://www.codership.com/wiki/doku.php?id=notification_command
 #
-# Author: Gabe Guillen <gguillen@gesa.com>
-# Modified by: Josh Goldsmith <joshin@hotmail.com>
-# Version: 1.4
-# Release: 5/14/2015
+# Author: Gabe Guillen <gabeguillen@outlook.com>
+# Version: 1.5
+# Release: 3/5/2015
 # Use at your own risk.  No warranties expressed or implied.
 #
 
@@ -17,7 +16,6 @@ import sys
 import getopt
 
 import smtplib
-import datetime
 
 try: from email.mime.text import MIMEText
 except ImportError:
@@ -25,6 +23,7 @@ except ImportError:
     from email.MIMEText import MIMEText
 
 import socket
+import email.utils
 
 # Change this to some value if you don't want your server hostname to show in
 # the notification emails
@@ -49,7 +48,7 @@ MAIL_FROM = 'YOUR_EMAIL_HERE'
 MAIL_TO = ['SOME_OTHER_EMAIL_HERE']
 
 # Need Date in Header for SMTP RFC Compliance
-DATE = datetime.datetime.now().strftime( "%m/%d/%Y %H:%M" )
+DATE = email.utils.formatdate()
 
 # Edit below at your own risk
 ################################################################################
