@@ -14,7 +14,6 @@ from __future__ import print_function
 import os
 import sys
 import argparse
-import configparser
 from datetime import datetime
 import email.utils
 import logging
