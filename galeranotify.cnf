@@ -10,11 +10,12 @@ smtp_auth=
 smtp_user=
 smtp_pass=
 mail_from=
+# Comma separated list of email addresses
 mail_to=
 
 [MONGO]
 mongo_host=
 mongo_port=
-mongo_db=
+mongo_db=galera_notify
 mongo_user=
 mongo_pass=

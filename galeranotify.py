@@ -38,13 +38,11 @@ try:
 except ImportError:
     import ConfigParser as configparser
 
+
 # Change this to some value if you don't want your server hostname to show in
 # the notification emails
 THIS_SERVER = socket.gethostname()
-CONFIGURATION = "/etc/mysql/galeranotify.cnf"
-# Need Date in Header for SMTP RFC Compliance
-DATE = email.utils.formatdate()
-logger = None
+CONFIGURATION = ""
 
 
 # Edit below at your own risk
@@ -59,79 +57,85 @@ def main(config=None, options=None):
         sys.exit(1)
 
     message_obj = GaleraStatus(THIS_SERVER)
-    global logger
-    logger = logging.basicConfig(filename=config.get('GENERAL', 'log_file'),
-                                 level=config.get('GENERAL', 'log_level'))
-    logger.info("Parsing the options")
+
+    logging.info("Parsing the options")
     if options.status:
-        logger.debug("Setting status value")
+        logging.debug("Setting status value")
         message_obj.set_status(options.status)
     if options.uuid:
-        logger.debug("Setting uuid value")
+        logging.debug("Setting uuid value")
         message_obj.set_uuid(options.uuid)
     if options.primary:
-        logger.debug("Setting primary value")
+        logging.debug("Setting primary value")
         message_obj.set_primary(options.primary)
-    if options.members:
-        logger.debug("Setting members value")
-        message_obj.set_members(options.members)
+    if options.member:
+        logging.debug("Setting members value")
+        message_obj.set_members(options.member)
     if options.index:
-        logger.debug("Setting index value")
+        logging.debug("Setting index value")
         message_obj.set_index(options.index)
     try:
-        logger.info("Connecting to MongoDB")
+        logging.info("Connecting to MongoDB")
         save_to_mongo(dbname=config.get('MONGO', 'mongo_db'),
                       user=config.get('MONGO', 'mongo_user'),
                       passwd=config.get('MONGO', 'mongo_pass'),
-                      port=config.getint('MONGO', 'mongo_port'),
-                      data=GaleraStatus)
-        logger.info("Sending email to recipient")
+                      port=config.get('MONGO', 'mongo_port'),
+                      data=message_obj)
+        logging.info("Sending email to recipient")
         send_notification(mail_from=config.get('SMTP', 'mail_from'),
                           mail_to=config.get('SMTP', 'mail_to'),
                           subject='[Galera] Notification from {}'.format(
                           THIS_SERVER),
                           message=message_obj,
-                          smtp_port=config.getint('SMPT', 'smtp_port'),
+                          smtp_port=config.get('SMTP', 'smtp_port'),
                           smtp_server=config.get('SMTP', 'smtp_server'),
                           smtp_ssl=config.get('SMTP', 'smtp_ssl'),
-                          smtp_auth=config.get('SMTP', 'smtp_atuh'),
+                          smtp_auth=config.get('SMTP', 'smtp_auth'),
                           smtp_user=config.get('SMTP', 'smtp_user'),
                           smtp_pass=config.get('SMTP', 'smtp_pass'))
     except Exception as err:
-        logger.critical("Unable to send notifications: {}".format(str(err)))
+        logging.critical("Unable to send notifications: {}".format(str(err)))
         print("Unable to send notification: {}".format(str(err)))
         sys.exit(1)
 
 
-def save_to_mongo(dbname='wsrep_notify', user=None, passwd=None, port=27017,
+def save_to_mongo(dbname='wsrep_notify', user=None, passwd=None, port=None,
                   data=None, host='localhost'):
     if data is None:
         return
     try:
-        logger.debug("Creating MongoClient")
+        logging.debug("Creating MongoClient")
+        if port is None or port == '':
+            port = 27017
         client = MongoClient(host=host, port=int(port), username=user,
                              password=passwd)
+        logging.debug("Connected to MongoDB")
         db = client[dbname]
         membership = db['membership']
         # Log time it happend
         now_date = datetime.now().strftime("%Y-%m-%d %H-%M-%S")
         now_time = time.time()
-        i = 1
+        i = 0
         members = []
-        for node in data._members:
+        logging.debug("Looping over members")
+        for node in data.get_members():
             # <node UUID> / <node name> / <incoming address>
             node_uuid, node_name, node_address = node.split('/')
-            node_address, node_port = node_address.split(':')
-            logger.debug("Adding node {}, index {}".format(node_name, str(i)))
+            # Set default port for our node
+            node_port = '3306'
+            if ':' in node_address:
+                node_address, node_port = node_address.split(':')
+            logging.debug("Adding node {} / address {} / index {}"
+                          .format(node_name, node_address, str(i)))
             members.append({'idx': i, 'node_uuid': node_uuid,
                             'node_name': node_name,
                             'node_adress': node_address,
                             'node_port': node_port})
             i += 1
-        logger.debug("Inserting data into MongoDB")
-        doc = membership.insert_one({'status': data.getstatus(),
-                                     'cluster_uuid': data.getuuid(),
-                                     'primary': data.getprimary(),
+        logging.debug("Inserting data into MongoDB")
+        doc = membership.insert_one({'status': data.get_status(),
+                                     'cluster_uuid': data.get_uuid(),
+                                     'primary': data.get_primary(),
                                      'cluster_size': len(members),
                                      'time': now_time,
                                      'date': now_date,
@@ -147,36 +151,36 @@ def save_to_mongo(dbname='wsrep_notify', user=None, passwd=None, port=27017,
 
 def send_notification(mail_from=None, mail_to=None, smtp_server=None,
                       subject="[GALERA] Notification", message=None,
-                      smtp_port=25, smtp_auth=False, smtp_ssl=False,
+                      smtp_port=None, smtp_auth=False, smtp_ssl=False,
                       smtp_user=None, smtp_pass=None):
-    logger.debug("Creating MIMEText message")
-    msg = MIMEText(message)
+    logging.debug("Creating MIMEText message")
+    msg = MIMEText(message.get_message())
 
     msg['From'] = mail_from
-    msg['To'] = ', '.join(mail_to)
+    msg['To'] = mail_to
     msg['Subject'] = subject
     msg['Date'] = email.utils.formatdate()
+    if smtp_port is None or smtp_port == '':
+        smtp_port = 25
     if smtp_server is None:
         smtp_server = socket.gethostname()
 
-    if smtp_ssl:
-        logger.debug("Creating SMTP_SSL object")
-        mailer = smtplib.SMTP_SSL(smtp_server, smtp_port)
-    else:
-        logger.debug("Creating SMTP object")
-        mailer = smtplib.SMTP(smtp_server, smtp_port)
+    logging.debug("Creating SMTP object")
+    mailer = smtplib.SMTP(host=smtp_server, port=int(smtp_port))
 
     if smtp_auth:
-        logger.debug("Authenticating user")
+        logging.debug("Authenticating user")
         try:
+            mailer.ehlo()
+            mailer.starttls()
             mailer.login(smtp_user, smtp_pass)
         except SMTPAuthenticationError as err:
             raise Exception("Problem authenticating to SMTP server: {}"
                             .format(str(err)))
     try:
-        logger.debug("Sending email")
+        logging.debug("Sending email")
         mailer.sendmail(mail_from, mail_to, msg.as_string())
-        mailer.close()
+        mailer.quit()
     except SMTPResponseException as err:
         raise Exception("Problem with SMTP server: {}".format(str(err)))
     except SMTPException as err:
@@ -184,7 +188,7 @@ def send_notification(mail_from=None, mail_to=None, smtp_server=None,
     return 0
 
 
-class GaleraStatus:
+class GaleraStatus(object):
 
     """This class is made to handle and describe what changed on a Galera
     cluster node"""
@@ -232,7 +236,7 @@ class GaleraStatus:
         self._index = index
         self._count += 1
 
-    def __str__(self):
+    def get_message(self):
         message = "Galera running on {} has reported the following cluster" \
                   " membership change".format(str(self._server))
 
@@ -292,12 +296,12 @@ if __name__ == "__main__":
     epilog += "Originally written by Gabe Guillen, modified by Emmanuel "\
               "Quevillon."
     parser = argparse.ArgumentParser(epilog=epilog, description=description)
-    parser.add_argument('--index', default=None, type=int, action="store",
+    parser.add_argument('--index', default=None, type=str, action="store",
                         dest="index", required=True,
                         help="Indicates node index value in the membership "
                              "list.")
-    parser.add_argument('--members', default=None, type=str, action="store",
-                        dest="members", required=True,
+    parser.add_argument('--member', default=None, type=str, action="store",
+                        dest="member", required=True,
                         help="List containing entries for each node that is "
                              "connected to the cluster.")
     parser.add_argument('--primary', default=None, type=str, action="store",
@@ -320,5 +324,9 @@ if __name__ == "__main__":
         parser.print_help()
         parser.exit(status=1)
 
+    logging.basicConfig(filename=config.get('GENERAL', 'log_file'),
+                        level=config.get('GENERAL', 'log_level'),
+                        format="[%(asctime)s] %(funcName)s:%(lineno)d "
+                               "%(levelname)-5s: %(message)s")
     main(config=config, options=options)
     sys.exit(0)
