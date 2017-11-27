@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#
+# -*- coding: utf-8 -*-
 # Script to send email notifications when a change in Galera cluster membership
 # occurs.
 #
@@ -34,7 +34,10 @@ try:
 except ImportError:
     # Python 2.4 (CentOS 5.x)
     from email.MIMEText import MIMEText
-
+try:
+    import configparser
+except ImportError:
+    import ConfigParser as configparser
 
 # Change this to some value if you don't want your server hostname to show in
 # the notification emails
