@@ -306,7 +306,7 @@ if __name__ == "__main__":
                              "indicating whether it considers itself part of"
                              " the Primary Component")
     parser.add_argument('--status', default=None, type=str, action="store",
-                        dest="status", require=True,
+                        dest="status", required=True,
                         help="The node passes a string indicating it’s current"
                              " state")
     parser.add_argument('--uuid', default=None, type=str, action="store",
