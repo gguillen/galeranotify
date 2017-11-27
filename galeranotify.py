@@ -156,6 +156,8 @@ def send_notification(mail_from=None, mail_to=None, smtp_server=None,
     msg['To'] = ', '.join(mail_to)
     msg['Subject'] = subject
     msg['Date'] = email.utils.formatdate()
+    if smtp_server is None:
+        smtp_server = socket.gethostname()
 
     if smtp_ssl:
         logger.debug("Creating SMTP_SSL object")
