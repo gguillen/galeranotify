@@ -10,7 +10,7 @@
 # Release: 3/5/2015
 # Use at your own risk.  No warranties expressed or implied.
 #
-
+from __future__ import print_function
 import os
 import sys
 import argparse
