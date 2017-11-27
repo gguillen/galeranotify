@@ -60,7 +60,7 @@ def main(config=None, options=None):
 
     message_obj = GaleraStatus(THIS_SERVER)
     global logger
-    logger = logging.basicConfig(filename=config.get('GENERAL', 'logfile'),
+    logger = logging.basicConfig(filename=config.get('GENERAL', 'log_file'),
                                  level=config.get('GENERAL', 'log_level'))
     logger.info("Parsing the options")
     if options.status:
