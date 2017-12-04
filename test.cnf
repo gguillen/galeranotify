@@ -1,6 +1,6 @@
 [GENERAL]
-log_file=
-log_level=
+log_file=test.log
+log_level=DEBUG
 
 [SMTP]
 smtp_server=
@@ -15,4 +15,8 @@ mail_to=
 
 [MONGO]
 mongo_uri=mongodb://new_user:new_password@localhost
+mongo_host=localhost
+mongo_port=
 mongo_db=galera_notify
+mongo_user=new_user
+mongo_pass=new_password

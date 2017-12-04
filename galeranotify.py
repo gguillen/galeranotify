@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # Script to send email notifications when a change in Galera cluster membership
 # occurs.
@@ -42,7 +42,7 @@ except ImportError:
 # Change this to some value if you don't want your server hostname to show in
 # the notification emails
 THIS_SERVER = socket.gethostname()
-CONFIGURATION = ""
+CONFIGURATION = "test.cnf"
 
 
 # Edit below at your own risk
@@ -68,18 +68,16 @@ def main(config=None, options=None):
     if options.primary:
         logging.debug("Setting primary value")
         message_obj.set_primary(options.primary)
-    if options.member:
+    if options.members:
         logging.debug("Setting members value")
-        message_obj.set_members(options.member)
+        message_obj.set_members(options.members)
     if options.index:
         logging.debug("Setting index value")
         message_obj.set_index(options.index)
     try:
         logging.info("Connecting to MongoDB")
         save_to_mongo(dbname=config.get('MONGO', 'mongo_db'),
-                      user=config.get('MONGO', 'mongo_user'),
-                      passwd=config.get('MONGO', 'mongo_pass'),
-                      port=config.get('MONGO', 'mongo_port'),
+                      uri=config.get('MONGO', 'mongo_uri'),
                       data=message_obj)
         logging.info("Sending email to recipient")
         send_notification(mail_from=config.get('SMTP', 'mail_from'),
@@ -99,16 +97,12 @@ def main(config=None, options=None):
         sys.exit(1)
 
 
-def save_to_mongo(dbname='wsrep_notify', user=None, passwd=None, port=None,
-                  data=None, host='localhost'):
+def save_to_mongo(dbname='wsrep_notify', uri=None, data=None):
     if data is None:
         return
     try:
         logging.debug("Creating MongoClient")
-        if port is None or port == '':
-            port = 27017
-        client = MongoClient(host=host, port=int(port), username=user,
-                             password=passwd)
+        client = MongoClient(uri)
         logging.debug("Connected to MongoDB")
         db = client[dbname]
         membership = db['membership']
@@ -300,8 +294,8 @@ if __name__ == "__main__":
                         dest="index", required=True,
                         help="Indicates node index value in the membership "
                              "list.")
-    parser.add_argument('--member', default=None, type=str, action="store",
-                        dest="member", required=True,
+    parser.add_argument('--members', default=None, type=str, action="store",
+                        dest="members", required=True,
                         help="List containing entries for each node that is "
                              "connected to the cluster.")
     parser.add_argument('--primary', default=None, type=str, action="store",
