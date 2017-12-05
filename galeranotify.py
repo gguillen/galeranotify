@@ -42,7 +42,8 @@ except ImportError:
 # Change this to some value if you don't want your server hostname to show in
 # the notification emails
 THIS_SERVER = socket.gethostname()
-CONFIGURATION = "test.cnf"
+# PLEASE EDIT ME!
+CONFIGURATION = "/path/to/galeranotify.cnf"
 
 
 # Edit below at your own risk
