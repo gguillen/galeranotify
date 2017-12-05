@@ -3,9 +3,9 @@ log_file=
 log_level=
 
 [SMTP]
+# Can be empty, will be set from socket.gethostname()
 smtp_server=
 smtp_port=
-smtp_ssl=
 smtp_auth=
 smtp_user=
 smtp_pass=
@@ -14,5 +14,5 @@ mail_from=
 mail_to=
 
 [MONGO]
-mongo_uri=mongodb://new_user:new_password@localhost
-mongo_db=galera_notify
+mongo_uri=
+mongo_db=

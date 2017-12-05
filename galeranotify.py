@@ -58,7 +58,7 @@ def main(config=None, options=None):
 
     message_obj = GaleraStatus(THIS_SERVER)
 
-    logging.info("Parsing the options")
+    logging.info("Parsing options")
     if options.status:
         logging.debug("Setting status value")
         message_obj.set_status(options.status)
@@ -87,10 +87,12 @@ def main(config=None, options=None):
                           message=message_obj,
                           smtp_port=config.get('SMTP', 'smtp_port'),
                           smtp_server=config.get('SMTP', 'smtp_server'),
-                          smtp_ssl=config.get('SMTP', 'smtp_ssl'),
+                          #smtp_ssl=config.get('SMTP', 'smtp_ssl'),
                           smtp_auth=config.get('SMTP', 'smtp_auth'),
                           smtp_user=config.get('SMTP', 'smtp_user'),
                           smtp_pass=config.get('SMTP', 'smtp_pass'))
+        logging.info("Host {} has status {}".format(THIS_SERVER,
+                                                    message_obj.get_status()))
     except Exception as err:
         logging.critical("Unable to send notifications: {}".format(str(err)))
         print("Unable to send notification: {}".format(str(err)))
@@ -162,7 +164,7 @@ def send_notification(mail_from=None, mail_to=None, smtp_server=None,
     logging.debug("Creating SMTP object")
     mailer = smtplib.SMTP(host=smtp_server, port=int(smtp_port))
 
-    if smtp_auth:
+    if smtp_auth is True:
         logging.debug("Authenticating user")
         try:
             mailer.ehlo()
@@ -173,6 +175,7 @@ def send_notification(mail_from=None, mail_to=None, smtp_server=None,
                             .format(str(err)))
     try:
         logging.debug("Sending email")
+        mailer.connect()
         mailer.sendmail(mail_from, mail_to, msg.as_string())
         mailer.quit()
     except SMTPResponseException as err:
