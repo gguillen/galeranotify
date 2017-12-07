@@ -295,24 +295,24 @@ if __name__ == "__main__":
               "Quevillon."
     parser = argparse.ArgumentParser(epilog=epilog, description=description)
     parser.add_argument('--index', default=None, type=str, action="store",
-                        dest="index", required=True,
+                        dest="index", required=False,
                         help="Indicates node index value in the membership "
                              "list.")
     parser.add_argument('--members', default=None, type=str, action="store",
-                        dest="members", required=True,
+                        dest="members", required=False,
                         help="List containing entries for each node that is "
                              "connected to the cluster.")
     parser.add_argument('--primary', default=None, type=str, action="store",
-                        dest="primary", required=True,
+                        dest="primary", required=False,
                         help="The node passes a string of either yes or no, "
                              "indicating whether it considers itself part of"
                              " the Primary Component")
     parser.add_argument('--status', default=None, type=str, action="store",
-                        dest="status", required=True,
+                        dest="status", required=False,
                         help="The node passes a string indicating it’s current"
                              " state")
     parser.add_argument('--uuid', default=None, type=str, action="store",
-                        dest="uuid", required=True,
+                        dest="uuid", required=False,
                         help="Refers to the unique identifier the node "
                              "receives from the wsrep Provider.")
     options = parser.parse_args()
