@@ -278,13 +278,6 @@ class GaleraStatus(object):
 
 if __name__ == "__main__":
 
-    if not os.path.exists(CONFIGURATION):
-        print("Can't find configuration file!", file=sys.stderr)
-        sys.exit(1)
-
-    config = configparser.ConfigParser()
-    config.read(CONFIGURATION)
-
     description = "Python script for use with Galera wsrep_notify_cmd. It "\
                   "sends email and save Galera nodes states in MongoDB."
 
@@ -321,6 +314,13 @@ if __name__ == "__main__":
         parser.print_usage()
         parser.print_help()
         parser.exit(status=1)
+
+    if not os.path.exists(CONFIGURATION):
+        print("Can't find configuration file!", file=sys.stderr)
+        sys.exit(1)
+
+    config = configparser.ConfigParser()
+    config.read(CONFIGURATION)
 
     logging.basicConfig(filename=config.get('GENERAL', 'log_file'),
                         level=config.get('GENERAL', 'log_level'),
