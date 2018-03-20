@@ -14,5 +14,6 @@ mail_from=
 mail_to=
 
 [MONGO]
+use_mongo=
 mongo_uri=
 mongo_db=

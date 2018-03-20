@@ -77,9 +77,10 @@ def main(config=None, options=None):
         message_obj.set_index(options.index)
     try:
         logging.info("Connecting to MongoDB")
-        save_to_mongo(dbname=config.get('MONGO', 'mongo_db'),
-                      uri=config.get('MONGO', 'mongo_uri'),
-                      data=message_obj)
+        if config.get('MONGO', 'use_mongo') is True:
+            save_to_mongo(dbname=config.get('MONGO', 'mongo_db'),
+                          uri=config.get('MONGO', 'mongo_uri'),
+                          data=message_obj)
         logging.info("Sending email to recipient")
         send_notification(mail_from=config.get('SMTP', 'mail_from'),
                           mail_to=config.get('SMTP', 'mail_to'),
