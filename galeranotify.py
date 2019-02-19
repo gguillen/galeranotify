@@ -76,8 +76,8 @@ def main(config=None, options=None):
         logging.debug("Setting index value")
         message_obj.set_index(options.index)
     try:
-        logging.info("Connecting to MongoDB")
         if config.get('MONGO', 'use_mongo') is True:
+            logging.info("Connecting to MongoDB")
             save_to_mongo(dbname=config.get('MONGO', 'mongo_db'),
                           uri=config.get('MONGO', 'mongo_uri'),
                           data=message_obj)
@@ -97,7 +97,8 @@ def main(config=None, options=None):
                                                     message_obj.get_status()))
     except Exception as err:
         logging.critical("Unable to send notifications: {}".format(str(err)))
-        print("Unable to send notification: {}".format(str(err)))
+        print("Unable to send notification: {}".format(str(err)),
+              file=sys.stderr)
         sys.exit(1)
 
 
