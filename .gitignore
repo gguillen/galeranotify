@@ -1,3 +1,8 @@
 .idea*
 ._*
-
+.Python
+pip-selfcheck.json
+bin/
+lib/
+include/
+share/

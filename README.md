@@ -1,7 +1,7 @@
 galeranotify
 ============
 
-Python E-Mail script for use with Galera wsrep_notify_cmd
+Python E-Mail script for use with Galera `wsrep_notify_cmd`
 
 Why do I need / want this?
 --------------------------
@@ -12,6 +12,11 @@ I've been using this on our [Percona XtraDB Cluster](http://www.percona.com/soft
 
 I hope someone finds it useful.
 
+Added by Emmanuel Quevillon:
+
+In order to keep track of what Galera cluster has operating on, I added the possibility to log cluster operation in a MongoDB database.
+Edit `galeranotify.py` to point `CONFIGURATION` to the appropriate configuration file (check `galeranotify.cnf` for example).
+
 Set up
 ------
 
@@ -21,9 +26,9 @@ Set up
 
 3. Manually execute galeranotify.py with several of the options set (check usage) and check to make sure the script executes with no errors and that you receive the notification e-mail.
 
-4. Set 'wsrep_notify_cmd = <path of galeranotify.py>' in your my.cnf file.
+4. Set '`wsrep_notify_cmd` = <path of galeranotify.py>' in your my.cnf file or in your Galera cluster `set global wsrep_notify_cmd="<path of galeranotify.py>";`
 
-5. Restart MySql.
+5. Restart MySql if you edited my.cnf.
 
 SELinux
 -------
