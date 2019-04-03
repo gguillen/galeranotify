@@ -1,0 +1,12 @@
+---
+smtp:
+        server: mailserver.dns
+        port: 25
+        ssl: False
+        auth_enable: False
+        username:  ''
+        password: ''
+email_to:
+        - example@invalid.tld
+        - admin@help.me
+email_from: galera@localhost
