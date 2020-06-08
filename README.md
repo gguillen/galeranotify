@@ -14,7 +14,7 @@ Installation
 
 Install it via pip is the easiest way
 ```
-pip install git+https://git.binary-kitchen.de/sprinterfreak/galeranotify
+pip install git+https://github.com/gguillen/galeranotify.git
 ```
 
 - Place the galeranotify.yml under /etc/mysql and configure it.
