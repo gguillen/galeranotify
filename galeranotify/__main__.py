@@ -12,8 +12,3 @@ import galeranotify
 if __name__ == '__main__':
     galeranotify.main()
 
-import galeranotify
-
-if __name__ == '__main__':
-    galeranotify.main()
-

@@ -1,29 +1,25 @@
 galeranotify
 ============
 
-Python E-Mail script for use with Galera wsrep_notify_cmd
+Python E-Mail script for use with Galera wsrep\_notify\_cmd
 
-Why do I need / want this?
---------------------------
+This script immediately generates an E-Mail if Your cluster state changes, so You won't miss a second.
+Also duplicates are dropped. Using Galera for instance in combination with commercial backup software like Comvault leads to a whole buch of notifications without a state change.
+This is caused by Comvault illegaly LOCKing slave-tables while dumping data out of the cluster. Since the LOCK didn't last too long, the locked slave is pulled back to synced shortly after.
+Each locked table causes an E-Mail. Therefore galeranotify remembers its previous state and drops the message if no state change has really happend. 
 
-[Galera](http://codership.com/products/galera_replication) makes my life easier with near synchronous replication for MySQL.  We have monitoring tools in place, but its nice to get updates in real time about how the cluster is operating.  So I wrote galeranotify.
 
-I've been using this on our [Percona XtraDB Cluster](http://www.percona.com/software/percona-xtradb-cluster) for quite a while now with no issues.
-
-I hope someone finds it useful.
-
-Set up
+Installation
 ------
 
-1. Edit galeranotify.py to change the configuration options.  They should be pretty straightforward.
+Install it via pip is the easiest way
+```
+pip install git+https://github.com/gguillen/galeranotify.git
+```
 
-2. Place galeranotify.py in a common location and make sure you and your MySql user have execute permissions.
-
-3. Manually execute galeranotify.py with several of the options set (check usage) and check to make sure the script executes with no errors and that you receive the notification e-mail.
-
-4. Set 'wsrep_notify_cmd = <path of galeranotify.py>' in your my.cnf file.
-
-5. Restart MySql.
+- Place the galeranotify.yml under /etc/mysql and configure it.
+- Set 'wsrep\_notify\_cmd = galeranotify' in your my.cnf file
+- Restart MySql.
 
 SELinux
 -------
