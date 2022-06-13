@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 #
 # Script to send email notifications when a change in Galera cluster membership
 # occurs.
@@ -15,8 +15,6 @@ import os
 import sys
 import getopt
 
-import smtplib
-
 try: from email.mime.text import MIMEText
 except ImportError:
     # Python 2.4 (CentOS 5.x)
@@ -25,9 +23,24 @@ except ImportError:
 import socket
 import email.utils
 
+# Set to True to use sendmail for notification message or False for SMTP
+LOCAL_METHOD = False
+
 # Change this to some value if you don't want your server hostname to show in
 # the notification emails
 THIS_SERVER = socket.gethostname()
+
+# Takes a single sender. If LOCAL_METHOD is True you can set this to None and
+# the sender will be set to the user the galera node runs under (in accordance
+# with your sendmail settings).
+MAIL_FROM = 'YOUR_EMAIL_HERE'
+
+# Takes a list of recipients
+MAIL_TO = ['SOME_OTHER_EMAIL_HERE']
+
+###                                              ###
+# The rest is only needed if LOCAL_METHOD is False #
+###                                              ###
 
 # Server hostname or IP address
 SMTP_SERVER = 'YOUR_SMTP_HERE'
@@ -41,11 +54,6 @@ SMTP_AUTH = False
 # Fill in authorization information here if True above
 SMTP_USERNAME = ''
 SMTP_PASSWORD = ''
-
-# Takes a single sender
-MAIL_FROM = 'YOUR_EMAIL_HERE'
-# Takes a list of recipients
-MAIL_TO = ['SOME_OTHER_EMAIL_HERE']
 
 # Need Date in Header for SMTP RFC Compliance
 DATE = email.utils.formatdate()
@@ -88,9 +96,13 @@ def main(argv):
             elif opt in ("--index"):
                 message_obj.set_index(arg)
         try:
-            send_notification(MAIL_FROM, MAIL_TO, 'Galera Notification: ' + THIS_SERVER, DATE,
-                              str(message_obj), SMTP_SERVER, SMTP_PORT, SMTP_SSL, SMTP_AUTH,
-                              SMTP_USERNAME, SMTP_PASSWORD)
+            if(LOCAL_METHOD):
+                send_notification_local(MAIL_FROM, MAIL_TO, 'Galera Notification: ' + THIS_SERVER,
+                                        DATE, str(message_obj))
+            else:
+                send_notification_smtp(MAIL_FROM, MAIL_TO, 'Galera Notification: ' + THIS_SERVER,
+                                       DATE, str(message_obj), SMTP_SERVER, SMTP_PORT, SMTP_SSL,
+                                       SMTP_AUTH, SMTP_USERNAME, SMTP_PASSWORD)
         except Exception, e:
             print "Unable to send notification: %s" % e
             sys.exit(1)
@@ -100,8 +112,28 @@ def main(argv):
 
     sys.exit(0)
 
-def send_notification(from_email, to_email, subject, date, message, smtp_server,
-                      smtp_port, use_ssl, use_auth, smtp_user, smtp_pass):
+def send_notification_local(from_email, to_email, subject, date, message):
+    import subprocess
+    msg = MIMEText(message)
+
+    env = {}
+    env.update(os.environ)
+
+    from_args = []
+    if from_email != None and from_email != 'None':
+        from_args = ['-r', from_email]
+
+    args = ['mail', '-s', subject] + from_args + to_email
+    p = subprocess.Popen(args, env=env, stdin=subprocess.PIPE)
+    p.communicate(str(message)+'\n')
+
+    if p.returncode != 0:
+        raise Exception('Failed to send email using the local method.', p.returncode,
+                        from_email, to_email, subject, message)
+
+def send_notification_smtp(from_email, to_email, subject, date, message, smtp_server,
+                           smtp_port, use_ssl, use_auth, smtp_user, smtp_pass):
+    import smtplib
     msg = MIMEText(message)
 
     msg['From'] = from_email
