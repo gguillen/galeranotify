@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 #
 # Script to send email notifications when a change in Galera cluster membership
 # occurs.
@@ -67,7 +67,7 @@ def main(argv):
     try:
         opts, args = getopt.getopt(argv, "h", ["status=","uuid=",'primary=','members=','index='])
     except getopt.GetoptError:
-        print usage
+        print (usage)
         sys.exit(2)
 
     if(len(opts) > 0):
@@ -75,7 +75,7 @@ def main(argv):
 
         for opt, arg in opts:
             if opt == '-h':
-                print usage
+                print (usage)
                 sys.exit()
             elif opt in ("--status"):
                 message_obj.set_status(arg)
@@ -91,11 +91,11 @@ def main(argv):
             send_notification(MAIL_FROM, MAIL_TO, 'Galera Notification: ' + THIS_SERVER, DATE,
                               str(message_obj), SMTP_SERVER, SMTP_PORT, SMTP_SSL, SMTP_AUTH,
                               SMTP_USERNAME, SMTP_PASSWORD)
-        except Exception, e:
-            print "Unable to send notification: %s" % e
+        except Exception as e:
+            print ("Unable to send notification: %s", e)
             sys.exit(1)
     else:
-        print usage
+        print (usage)
         sys.exit(2)
 
     sys.exit(0)
